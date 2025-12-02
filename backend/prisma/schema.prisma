@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 单词表
+model Word {
+  id           Int       @id @default(autoincrement())
+  english      String    @unique              // 英文单词/短语
+  phonetic     String?                          // 音标
+  partOfSpeech String    @default("")         // 词性（JSON字符串存储）
+  englishDef   String?                         // 英文释义
+  chineseDef   String                         // 中文释义
+  
+  // 考试分类标签
+  isCET4       Boolean   @default(false)      // 是否CET-4词汇
+  isCET6       Boolean   @default(false)      // 是否CET-6词汇
+  isIELTS      Boolean   @default(false)      // 是否雅思词汇
+  isTOEFL      Boolean   @default(false)      // 是否托福词汇
+  isGraduate   Boolean   @default(false)      // 是否考研词汇
+  
+  // 词频信息
+  cet4Freq     Int?                            // CET-4词频
+  cet6Freq     Int?                           // CET-6词频
+  ieltsFreq    Int?                           // 雅思词频
+  toeflFreq    Int?                           // 托福词频
+  graduateFreq Int?                           // 考研词频
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  quizRecords  QuizRecord[]
+}
+
+// 考核记录表
+model QuizRecord {
+  id         Int      @id @default(autoincrement())
+  wordId     Int
+  word       Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  isCorrect  Boolean                          // 是否回答正确
+  userAnswer String?                          // 用户的答案
+  sessionId  String                           // 考核批次ID
+  quizDate   DateTime @default(now())         // 考核日期
+}
+
+// 考核批次表
+model QuizSession {
+  id           Int       @id @default(autoincrement())
+  sessionId    String    @unique              // 批次唯一标识
+  wordCount    Int                            // 本次考核单词数量
+  correctCount Int       @default(0)          // 正确数量
+  wrongCount   Int       @default(0)          // 错误数量
+  wordIds      String    @default("")         // 本次考核的单词ID列表（JSON字符串）
+  status       String    @default("ongoing")  // 状态: ongoing, completed
+  createdAt    DateTime  @default(now())
+  completedAt  DateTime?                      // 完成时间
+}
