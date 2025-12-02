@@ -1,6 +1,6 @@
-# 📚 单词记忆助手 (GoodWord)
+# 📚 GoodWord单词辅记
 
-一个基于 AI 的英语单词记忆和考核应用，帮助用户高效记忆单词，轻松备考各类英语考试。
+GoodWord是一个基于 AI （通义千问）的英语单词记忆和考核应用，帮助用户高效记忆单词。作者是一个苦逼大学生，复习六级时，遇到各种生词时，需要先利用翻译软件翻译成中文，再记到单词本上，实在略显麻烦。因此，我开发了一款AI辅助记忆软件，基于Claude编写。
 
 ![Node.js](https://img.shields.io/badge/Node. js-20. x-green)
 ![React](https://img. shields.io/badge/React-19.x-blue)
