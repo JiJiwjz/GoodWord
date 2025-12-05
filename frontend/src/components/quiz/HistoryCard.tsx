@@ -8,7 +8,6 @@ interface HistoryCardProps {
 }
 
 export function HistoryCard({ history, onClick }: HistoryCardProps) {
-  // 格式化日期
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-CN', {
@@ -20,15 +19,7 @@ export function HistoryCard({ history, onClick }: HistoryCardProps) {
     });
   };
 
-  // 根据准确率获取颜色
-  const getAccuracyColor = (accuracy: number) => {
-    if (accuracy >= 90) return 'text-green-600';
-    if (accuracy >= 70) return 'text-blue-600';
-    if (accuracy >= 50) return 'text-orange-600';
-    return 'text-red-600';
-  };
-
-  const getAccuracyBadge = (accuracy: number) => {
+  const getAccuracyBadge = (accuracy: number): 'success' | 'info' | 'warning' | 'danger' => {
     if (accuracy >= 90) return 'success';
     if (accuracy >= 70) return 'info';
     if (accuracy >= 50) return 'warning';
@@ -52,6 +43,9 @@ export function HistoryCard({ history, onClick }: HistoryCardProps) {
           <div className="flex items-center gap-6">
             <div>
               <span className="text-2xl font-bold text-gray-900">{history.wordCount}</span>
+              <span className="text-sm text-gray-500 ml-1">词</span>
+              <span className="text-lg text-gray-400 mx-1">/</span>
+              <span className="text-lg font-medium text-gray-700">{history.totalQuestions}</span>
               <span className="text-sm text-gray-500 ml-1">题</span>
             </div>
 
@@ -65,13 +59,12 @@ export function HistoryCard({ history, onClick }: HistoryCardProps) {
               <span className="font-medium">{history.wrongCount}</span>
             </div>
 
-            <Badge variant={getAccuracyBadge(history.accuracy) as 'success' | 'info' | 'warning' | 'danger'}>
+            <Badge variant={getAccuracyBadge(history.accuracy)}>
               {history.accuracy}% 准确率
             </Badge>
           </div>
         </div>
 
-        {/* 箭头 */}
         <ChevronRight className="w-5 h-5 text-gray-400" />
       </div>
     </Card>

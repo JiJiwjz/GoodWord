@@ -1,19 +1,15 @@
 // 单词信息（AI 返回的结构）
 export interface WordInfo {
-  english: string;           // 英文单词/短语
-  phonetic: string;          // 音标
-  partOfSpeech: string[];    // 词性列表
-  englishDef: string;        // 英文释义
-  chineseDef: string;        // 中文释义
-  
-  // 考试分类
+  english: string;
+  phonetic: string;
+  partOfSpeech: string[];
+  englishDef: string;
+  chineseDef: string;
   isCET4: boolean;
   isCET6: boolean;
   isIELTS: boolean;
   isTOEFL: boolean;
   isGraduate: boolean;
-  
-  // 词频（1-5，5为最高频）
   cet4Freq: number | null;
   cet6Freq: number | null;
   ieltsFreq: number | null;
@@ -44,23 +40,44 @@ export interface DashScopeResponse {
   };
 }
 
-// 考核相关类型
-export interface QuizWord {
+// 干扰选项生成请求
+export interface DistractorRequest {
+  words: {
+    english: string;
+    chineseDef: string;
+  }[];
+}
+
+// 干扰选项生成响应
+export interface DistractorResponse {
+  success: boolean;
+  data?: {
+    [english: string]: string[];  // 每个单词对应3个干扰选项
+  };
+  error?: string;
+}
+
+// 考核单词（中译英阶段）
+export interface QuizWordPhase1 {
   id: number;
   chineseDef: string;
   partOfSpeech: string[];
 }
 
-export interface QuizResult {
-  wordId: number;
+// 考核单词（英译中阶段）
+export interface QuizWordPhase2 {
+  id: number;
   english: string;
-  userAnswer: string;
-  isCorrect: boolean;
+  phonetic: string | null;
+  partOfSpeech: string[];
+  options: string[];      // 4个选项（包含正确答案）
+  correctIndex: number;   // 正确答案的索引
 }
 
+// 考核会话数据
 export interface QuizSessionData {
   sessionId: string;
-  words: QuizWord[];
-  currentIndex: number;
-  results: QuizResult[];
+  totalCount: number;
+  phase1Words: QuizWordPhase1[];  // 中译英单词
+  phase2Words: QuizWordPhase2[];  // 英译中单词
 }

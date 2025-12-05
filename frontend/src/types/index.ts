@@ -30,25 +30,45 @@ export interface WordStats {
   graduateCount: number;
 }
 
-// 考核单词
-export interface QuizWord {
+// 考核单词（阶段1：中译英）
+export interface QuizWordPhase1 {
   id: number;
   chineseDef: string;
   partOfSpeech: string[];
+}
+
+// 考核单词（阶段2：英译中）
+export interface QuizWordPhase2 {
+  id: number;
+  english: string;
+  phonetic: string | null;
+  partOfSpeech: string[];
+  options: string[];
+  correctIndex: number;
 }
 
 // 考核会话
 export interface QuizSession {
   sessionId: string;
   totalCount: number;
-  words: QuizWord[];
+  phase1Words: QuizWordPhase1[];
+  phase2Words: QuizWordPhase2[];
 }
 
-// 答案结果
-export interface AnswerResult {
+// 阶段1答案结果
+export interface Phase1AnswerResult {
   isCorrect: boolean;
   correctAnswer: string;
   userAnswer: string;
+}
+
+// 阶段2答案结果
+export interface Phase2AnswerResult {
+  isCorrect: boolean;
+  correctAnswer: string;
+  correctIndex: number;
+  userAnswer: string;
+  selectedIndex: number;
 }
 
 // 考核结果
@@ -64,11 +84,13 @@ export interface QuizResult {
 export interface QuizFinishData {
   sessionId: string;
   totalCount: number;
+  totalQuestions: number;
   answeredCount: number;
   correctCount: number;
   wrongCount: number;
   accuracy: number;
-  results: QuizResult[];
+  phase1Results: QuizResult[];
+  phase2Results: QuizResult[];
   completedAt: string;
 }
 
@@ -76,6 +98,7 @@ export interface QuizFinishData {
 export interface QuizHistory {
   sessionId: string;
   wordCount: number;
+  totalQuestions: number;
   correctCount: number;
   wrongCount: number;
   accuracy: number;

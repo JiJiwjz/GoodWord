@@ -1,15 +1,26 @@
-import { clsx } from 'clsx';
-import type { ReactNode } from 'react';
+import { cn } from "../../utils/cn";
+import { motion } from "framer-motion";
 
 interface CardProps {
   className?: string;
-  children: ReactNode;
+  children: React.ReactNode;
+  onClick?: () => void;
+  hover?: boolean;
 }
 
-export function Card({ className, children }: CardProps) {
+export function Card({ className, children, onClick, hover = false }: CardProps) {
   return (
-    <div className={clsx('bg-white rounded-xl shadow-sm border border-gray-100 p-6', className)}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        "rounded-2xl p-6 relative overflow-hidden",
+        hover ? "glass-card cursor-pointer" : "glass-panel",
+        className
+      )}
+      onClick={onClick}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }

@@ -8,7 +8,6 @@ interface HistoryDetailProps {
 }
 
 export function HistoryDetail({ data, onBack }: HistoryDetailProps) {
-  // 格式化日期
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-CN', {
@@ -20,7 +19,6 @@ export function HistoryDetail({ data, onBack }: HistoryDetailProps) {
     });
   };
 
-  // 根据准确率获取评价
   const getEvaluation = (accuracy: number) => {
     if (accuracy >= 90) return { text: '优秀', color: 'text-green-600', bg: 'bg-green-50' };
     if (accuracy >= 70) return { text: '良好', color: 'text-blue-600', bg: 'bg-blue-50' };
@@ -29,6 +27,53 @@ export function HistoryDetail({ data, onBack }: HistoryDetailProps) {
   };
 
   const evaluation = getEvaluation(data.accuracy);
+
+  const renderResults = (results: typeof data.phase1Results, title: string) => (
+    <Card>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+      <div className="space-y-3">
+        {results.map((result, index) => (
+          <div
+            key={`${title}-${result.wordId}`}
+            className={`p-4 rounded-lg border ${
+              result.isCorrect
+                ? 'bg-green-50 border-green-200'
+                : 'bg-red-50 border-red-200'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`flex-shrink-0 p-1 rounded-full ${
+                  result. isCorrect ? 'bg-green-200' : 'bg-red-200'
+                }`}
+              >
+                {result.isCorrect ? (
+                  <Check className="w-4 h-4 text-green-700" />
+                ) : (
+                  <X className="w-4 h-4 text-red-700" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm text-gray-500">#{index + 1}</span>
+                  <span className="font-bold text-gray-900">{result.english}</span>
+                </div>
+                <p className="text-sm text-gray-600">{result.chineseDef}</p>
+                {! result.isCorrect && result.userAnswer && (
+                  <p className="text-sm text-red-600 mt-1">
+                    你的答案：{result.userAnswer}
+                  </p>
+                )}
+              </div>
+              <Badge variant={result.isCorrect ? 'success' : 'danger'}>
+                {result.isCorrect ?  '正确' : '错误'}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
@@ -54,13 +99,17 @@ export function HistoryDetail({ data, onBack }: HistoryDetailProps) {
         </div>
 
         {/* 统计数据 */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-5 gap-4 mb-6">
           <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-900">{data.totalCount}</div>
+            <div className="text-2xl font-bold text-gray-900">{data.totalQuestions}</div>
             <div className="text-sm text-gray-500">总题数</div>
           </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600">{data.totalCount}</div>
+            <div className="text-sm text-gray-500">单词数</div>
+          </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{data.correctCount}</div>
+            <div className="text-2xl font-bold text-green-600">{data. correctCount}</div>
             <div className="text-sm text-gray-500">正确</div>
           </div>
           <div className="text-center p-4 bg-red-50 rounded-lg">
@@ -74,58 +123,20 @@ export function HistoryDetail({ data, onBack }: HistoryDetailProps) {
         </div>
 
         {/* 评价 */}
-        <div className={`text-center py-3 rounded-lg ${evaluation.bg}`}>
+        <div className={`text-center py-3 rounded-lg ${evaluation. bg}`}>
           <span className={`text-lg font-medium ${evaluation.color}`}>
             {evaluation.text}
           </span>
         </div>
       </Card>
 
-      {/* 答题详情 */}
-      <Card>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">答题详情</h3>
-        <div className="space-y-3">
-          {data.results.map((result, index) => (
-            <div
-              key={result.wordId}
-              className={`p-4 rounded-lg border ${
-                result.isCorrect
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`flex-shrink-0 p-1 rounded-full ${
-                    result. isCorrect ? 'bg-green-200' : 'bg-red-200'
-                  }`}
-                >
-                  {result.isCorrect ? (
-                    <Check className="w-4 h-4 text-green-700" />
-                  ) : (
-                    <X className="w-4 h-4 text-red-700" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm text-gray-500">#{index + 1}</span>
-                    <span className="font-bold text-gray-900">{result.english}</span>
-                  </div>
-                  <p className="text-sm text-gray-600">{result.chineseDef}</p>
-                  {! result.isCorrect && (
-                    <p className="text-sm text-red-600 mt-1">
-                      你的答案：{result.userAnswer || '(跳过)'}
-                    </p>
-                  )}
-                </div>
-                <Badge variant={result.isCorrect ? 'success' : 'danger'}>
-                  {result.isCorrect ? '正确' : '错误'}
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+      {/* 阶段1结果 */}
+      {data. phase1Results && data.phase1Results. length > 0 && 
+        renderResults(data.phase1Results, '阶段一：中译英')}
+
+      {/* 阶段2结果 */}
+      {data. phase2Results && data.phase2Results. length > 0 && 
+        renderResults(data.phase2Results, '阶段二：英译中')}
     </div>
   );
 }

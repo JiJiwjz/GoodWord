@@ -9,6 +9,8 @@ node_modules/
 # 数据库文件
 *.db
 *.db-journal
+prisma/dev.db
+prisma/dev.db-journal
 
 # 构建输出
 dist/

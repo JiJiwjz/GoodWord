@@ -3,23 +3,22 @@ import type {
   Word,
   WordStats,
   QuizSession,
-  AnswerResult,
+  Phase1AnswerResult,
+  Phase2AnswerResult,
   QuizFinishData,
   QuizHistory,
   ApiResponse,
   PaginatedResponse,
 } from '../types';
 
-// 创建 axios 实例
 const api = axios.create({
   baseURL: '/api',
-  timeout: 30000,
+  timeout: 60000,  // 增加超时时间，因为生成干扰选项需要时间
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// 响应拦截器
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -30,13 +29,11 @@ api.interceptors.response.use(
 
 // ==================== 单词 API ====================
 
-// 添加单词
 export async function addWord(english: string): Promise<ApiResponse<Word>> {
   const response = await api. post<ApiResponse<Word>>('/words', { english });
   return response.data;
 }
 
-// 获取单词列表
 export async function getWords(params?: {
   page?: number;
   pageSize?: number;
@@ -51,25 +48,21 @@ export async function getWords(params?: {
   return response.data;
 }
 
-// 获取单词详情
 export async function getWordById(id: number): Promise<ApiResponse<Word>> {
   const response = await api.get<ApiResponse<Word>>(`/words/${id}`);
-  return response. data;
+  return response.data;
 }
 
-// 更新单词
 export async function updateWord(id: number, data: Partial<Word>): Promise<ApiResponse<Word>> {
   const response = await api.put<ApiResponse<Word>>(`/words/${id}`, data);
   return response.data;
 }
 
-// 删除单词
 export async function deleteWord(id: number): Promise<ApiResponse<null>> {
   const response = await api. delete<ApiResponse<null>>(`/words/${id}`);
   return response.data;
 }
 
-// 获取单词统计
 export async function getWordStats(): Promise<ApiResponse<WordStats>> {
   const response = await api.get<ApiResponse<WordStats>>('/words/stats');
   return response.data;
@@ -77,19 +70,18 @@ export async function getWordStats(): Promise<ApiResponse<WordStats>> {
 
 // ==================== 考核 API ====================
 
-// 开始考核
 export async function startQuiz(count: number): Promise<ApiResponse<QuizSession>> {
   const response = await api.post<ApiResponse<QuizSession>>('/quiz/start', { count });
   return response.data;
 }
 
-// 提交答案
-export async function submitAnswer(
+// 提交阶段1答案（中译英）
+export async function submitPhase1Answer(
   sessionId: string,
   wordId: number,
   answer: string
-): Promise<ApiResponse<AnswerResult>> {
-  const response = await api.post<ApiResponse<AnswerResult>>('/quiz/submit', {
+): Promise<ApiResponse<Phase1AnswerResult>> {
+  const response = await api.post<ApiResponse<Phase1AnswerResult>>('/quiz/submit/phase1', {
     sessionId,
     wordId,
     answer,
@@ -97,13 +89,25 @@ export async function submitAnswer(
   return response.data;
 }
 
-// 结束考核
+// 提交阶段2答案（英译中）
+export async function submitPhase2Answer(
+  sessionId: string,
+  wordId: number,
+  selectedIndex: number
+): Promise<ApiResponse<Phase2AnswerResult>> {
+  const response = await api.post<ApiResponse<Phase2AnswerResult>>('/quiz/submit/phase2', {
+    sessionId,
+    wordId,
+    selectedIndex,
+  });
+  return response.data;
+}
+
 export async function finishQuiz(sessionId: string): Promise<ApiResponse<QuizFinishData>> {
   const response = await api.post<ApiResponse<QuizFinishData>>('/quiz/finish', { sessionId });
   return response.data;
 }
 
-// 获取考核历史
 export async function getQuizHistory(params?: {
   page?: number;
   pageSize?: number;
@@ -112,7 +116,6 @@ export async function getQuizHistory(params?: {
   return response.data;
 }
 
-// 获取考核详情
 export async function getQuizDetail(sessionId: string): Promise<ApiResponse<QuizFinishData>> {
   const response = await api.get<ApiResponse<QuizFinishData>>(`/quiz/${sessionId}`);
   return response.data;

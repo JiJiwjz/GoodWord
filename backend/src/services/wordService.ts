@@ -220,29 +220,38 @@ function formatWord(word: {
 }) {
   let partOfSpeech: string[] = [];
   try {
+    // 尝试解析 JSON
     partOfSpeech = JSON.parse(word.partOfSpeech);
+    // 再次检查解析结果是否为数组
+    if (!Array.isArray(partOfSpeech)) {
+        partOfSpeech = [String(partOfSpeech)];
+    }
   } catch {
-    partOfSpeech = word.partOfSpeech ?  [word.partOfSpeech] : [];
+    // 解析失败时的兜底
+    partOfSpeech = word.partOfSpeech ? [word.partOfSpeech] : ['未知'];
   }
 
+  // 确保 english 不为空
+  const safeEnglish = word.english || 'Unknown Word';
+
   return {
-    id: word. id,
-    english: word. english,
-    phonetic: word.phonetic,
+    id: word.id,
+    english: safeEnglish,
+    phonetic: word.phonetic || '',
     partOfSpeech,
-    englishDef: word.englishDef,
-    chineseDef: word.chineseDef,
-    isCET4: word.isCET4,
-    isCET6: word.isCET6,
-    isIELTS: word.isIELTS,
-    isTOEFL: word.isTOEFL,
-    isGraduate: word.isGraduate,
+    englishDef: word.englishDef || '',
+    chineseDef: word.chineseDef || '暂无释义',
+    isCET4: !!word.isCET4,
+    isCET6: !!word.isCET6,
+    isIELTS: !!word.isIELTS,
+    isTOEFL: !!word.isTOEFL,
+    isGraduate: !!word.isGraduate,
     cet4Freq: word.cet4Freq,
     cet6Freq: word.cet6Freq,
     ieltsFreq: word.ieltsFreq,
     toeflFreq: word.toeflFreq,
     graduateFreq: word.graduateFreq,
-    createdAt: word.createdAt. toISOString(),
+    createdAt: word.createdAt.toISOString(),
     updatedAt: word.updatedAt.toISOString(),
   };
 }

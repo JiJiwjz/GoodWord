@@ -1,85 +1,91 @@
-import { Badge, Card } from '../common';
+import { Card, Badge } from '../common';
 import { Volume2, Trash2 } from 'lucide-react';
 import type { Word } from '../../types';
+import { motion } from 'framer-motion';
 
+// ... 接口定义 ...
 interface WordCardProps {
   word: Word;
   onDelete?: (id: number) => void;
   showDelete?: boolean;
 }
 
-export function WordCard({ word, onDelete, showDelete = false }: WordCardProps) {
+export function WordCard({ word, onDelete, showDelete }: WordCardProps) {
+  // ★★★ 增加安全检查，防止黑屏 ★★★
+  if (!word) return null;
+
+  const safeEnglish = word.english || 'Unknown';
+  const safePhonetic = word.phonetic || '';
+  // 确保 partOfSpeech 是数组，如果不是，转为空数组
+  const safePartOfSpeech = Array.isArray(word.partOfSpeech) ? word.partOfSpeech : [];
+  const safeChineseDef = word.chineseDef || '...';
+
   // 获取考试标签
   const examTags = [];
-  if (word.isCET4) examTags. push({ label: 'CET-4', freq: word.cet4Freq });
-  if (word.isCET6) examTags. push({ label: 'CET-6', freq: word. cet6Freq });
+  if (word.isCET4) examTags.push({ label: 'CET-4', freq: word.cet4Freq });
+  if (word.isCET6) examTags.push({ label: 'CET-6', freq: word.cet6Freq });
   if (word.isIELTS) examTags.push({ label: '雅思', freq: word.ieltsFreq });
   if (word.isTOEFL) examTags.push({ label: '托福', freq: word.toeflFreq });
-  if (word.isGraduate) examTags.push({ label: '考研', freq: word. graduateFreq });
+  if (word.isGraduate) examTags.push({ label: '考研', freq: word.graduateFreq });
 
-  // 播放发音
-  const playPronunciation = () => {
-    const utterance = new SpeechSynthesisUtterance(word.english);
+  const playPronunciation = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 防止触发卡片点击
+    const utterance = new SpeechSynthesisUtterance(safeEnglish);
     utterance.lang = 'en-US';
     speechSynthesis.speak(utterance);
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          {/* 单词和音标 */}
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-xl font-bold text-gray-900">{word.english}</h3>
-            <button
-              onClick={playPronunciation}
-              className="p-1. 5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-              title="播放发音"
-            >
-              <Volume2 className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* 音标和词性 */}
-          <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
-            {word.phonetic && <span>{word.phonetic}</span>}
-            {word.partOfSpeech. length > 0 && (
-              <span className="text-blue-600">{word.partOfSpeech. join(' / ')}</span>
-            )}
-          </div>
-
-          {/* 释义 */}
-          <div className="space-y-1 mb-4">
-            <p className="text-gray-900">{word.chineseDef}</p>
-            {word.englishDef && (
-              <p className="text-sm text-gray-500 italic">{word.englishDef}</p>
-            )}
-          </div>
-
-          {/* 考试标签 */}
-          {examTags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {examTags.map((tag) => (
-                <Badge key={tag. label} variant="info">
-                  {tag.label}
-                  {tag.freq && <span className="ml-1 opacity-75">★{tag.freq}</span>}
-                </Badge>
-              ))}
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card hover className="h-full flex flex-col group border-l-4 border-l-indigo-500">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-2xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+              {safeEnglish}
+            </h3>
+            <div className="flex items-center gap-2 text-slate-400 mt-1 font-mono text-sm">
+              {safePhonetic && <span>{safePhonetic}</span>}
+              {safePhonetic && safePartOfSpeech.length > 0 && <span className="w-1 h-1 rounded-full bg-slate-600" />}
+              {safePartOfSpeech.length > 0 && (
+                <span className="text-indigo-400 italic">{safePartOfSpeech.join(', ')}</span>
+              )}
             </div>
-          )}
+          </div>
+          <button
+            onClick={playPronunciation}
+            className="p-2 rounded-full bg-slate-800 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-indigo-500 hover:text-white"
+          >
+            <Volume2 className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* 删除按钮 */}
-        {showDelete && onDelete && (
-          <button
-            onClick={() => onDelete(word.id)}
-            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="删除单词"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
-        )}
-      </div>
-    </Card>
+        <p className="text-slate-300 mb-4 flex-grow">{safeChineseDef}</p>
+
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-800">
+          <div className="flex gap-2 flex-wrap">
+            {examTags.map((tag) => (
+              <span key={tag.label} className="px-2 py-1 rounded-md bg-slate-800 text-xs font-medium text-slate-300 border border-slate-700">
+                {tag.label}
+              </span>
+            ))}
+          </div>
+          
+          {showDelete && (
+            <button 
+              onClick={() => onDelete?.(word.id)}
+              className="text-slate-600 hover:text-red-400 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </Card>
+    </motion.div>
   );
 }
